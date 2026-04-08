@@ -1,0 +1,19 @@
+DEPLOY CHECKLIST
+
+1) Unzip this package.
+2) Create a GitHub repo.
+3) Upload everything INSIDE this folder to the repo root.
+4) Go to Streamlit Community Cloud.
+5) Create app.
+6) Select repo.
+7) Main file path: app.py
+8) Deploy.
+
+AFTER DEPLOYING
+- Open the app link on iPhone.
+- Share -> Add to Home Screen.
+
+IMPORTANT
+- requirements.txt must stay in the repo root.
+- app.py must stay in the repo root.
+- pages, data, and utils folders must stay beside app.py.

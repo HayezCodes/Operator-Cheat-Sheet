@@ -1,0 +1,2 @@
+venv\Scripts\python scripts\sync_notes_from_google_sheet.py
+pause
