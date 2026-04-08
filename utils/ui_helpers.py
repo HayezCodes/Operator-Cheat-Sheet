@@ -1,7 +1,5 @@
 from pathlib import Path
-
 import streamlit as st
-
 
 APP_ROOT = Path(__file__).resolve().parent.parent
 PAGE_TARGETS = {
@@ -11,10 +9,8 @@ PAGE_TARGETS = {
     "G & M Codes": APP_ROOT / "pages" / "3_G_M_Codes.py",
 }
 
-
 def switch_to_page(page_name: str) -> None:
-    st.switch_page(PAGE_TARGETS[page_name])
-
+    st.switch_page(str(PAGE_TARGETS[page_name]))
 
 def render_floor_nav(active_page: str) -> None:
     page_names = list(PAGE_TARGETS.keys())
@@ -27,7 +23,6 @@ def render_floor_nav(active_page: str) -> None:
 
     if page != active_page:
         switch_to_page(page)
-
 
 def render_cutting_mode_sidebar() -> None:
     modes = ["Conservative", "Standard", "Aggressive"]
