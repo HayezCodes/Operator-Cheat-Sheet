@@ -4,7 +4,7 @@ import streamlit as st
 
 from data.machines_data import MACHINES
 from utils.floor_notes import load_notes, save_note, ensure_notes_file
-from utils.ui_helpers import render_floor_nav
+from utils.ui_helpers import render_floor_nav, switch_to_page
 
 NOTES_FILE = "data/pending_notes.csv"
 
@@ -20,7 +20,7 @@ ensure_notes_file(NOTES_FILE)
 
 render_floor_nav("Quick Notes")
 if st.button("🏠", help="Back to Home"):
-    st.switch_page("app.py")
+    switch_to_page("Home")
 
 st.title("Quick Notes")
 st.caption("Fast operator note entry. Notes save to local CSV for later work-PC sync.")

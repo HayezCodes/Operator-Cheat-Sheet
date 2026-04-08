@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 from data.g_m_codes import G_CODES, M_CODES, SHOP_WARNINGS
-from utils.ui_helpers import render_floor_nav
+from utils.ui_helpers import render_floor_nav, switch_to_page
 
 st.set_page_config(page_title="G & M Codes", layout="wide", initial_sidebar_state="collapsed")
 st.markdown("""
@@ -13,7 +13,7 @@ st.markdown("""
 
 render_floor_nav("G & M Codes")
 if st.button("🏠", help="Back to Home"):
-    st.switch_page("app.py")
+    switch_to_page("Home")
 
 st.title("G & M Codes")
 st.caption("Operator-proof reference for common code use, including tool compensation basics")

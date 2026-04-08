@@ -3,7 +3,7 @@ import streamlit as st
 
 from data.materials import LATHE_MATERIALS, MILL_MATERIALS, DRILL_DATA, OPERATOR_NOTES
 from utils.formulas import rpm_from_sfm, ipm_from_ipr, drill_feed_ipm, tap_feed_ipm_from_tpi
-from utils.ui_helpers import render_cutting_mode_sidebar, render_floor_nav
+from utils.ui_helpers import render_cutting_mode_sidebar, render_floor_nav, switch_to_page
 
 st.set_page_config(
     page_title="Speeds & Feeds",
@@ -61,7 +61,7 @@ render_cutting_mode_sidebar()
 col_home, col_title = st.columns([1, 8])
 with col_home:
     if st.button("🏠", help="Back to Home"):
-        st.switch_page("app.py")
+        switch_to_page("Home")
 
 with col_title:
     st.title("Speeds & Feeds")

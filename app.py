@@ -1,6 +1,6 @@
 import os
 import streamlit as st
-from utils.ui_helpers import render_floor_nav
+from utils.ui_helpers import render_floor_nav, switch_to_page
 
 st.set_page_config(
     page_title="Shop Floor Cheat Sheet",
@@ -83,7 +83,7 @@ with col1:
         unsafe_allow_html=True,
     )
     if st.button("OPEN SPEEDS & FEEDS", use_container_width=True):
-        st.switch_page("pages/1_Speeds_Feeds.py")
+        switch_to_page("Speeds & Feeds")
 
 with col2:
     st.markdown(
@@ -97,7 +97,7 @@ with col2:
         unsafe_allow_html=True,
     )
     if st.button("OPEN QUICK NOTES", use_container_width=True):
-        st.switch_page("pages/2_Quick_Notes.py")
+        switch_to_page("Quick Notes")
 
 with col3:
     st.markdown(
@@ -111,4 +111,4 @@ with col3:
         unsafe_allow_html=True,
     )
     if st.button("OPEN G & M CODES", use_container_width=True):
-        st.switch_page("pages/3_G_M_Codes.py")
+        switch_to_page("G & M Codes")
