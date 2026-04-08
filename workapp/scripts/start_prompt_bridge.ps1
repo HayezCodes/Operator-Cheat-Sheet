@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
-$repoRoot = Split-Path -Parent $PSScriptRoot
-$configPath = Join-Path $repoRoot "bridge.config.json"
+$appRoot = Split-Path -Parent $PSScriptRoot
+$configPath = Join-Path $appRoot "bridge.config.json"
 
 function Get-BridgeConfig {
     param(
@@ -37,13 +37,31 @@ function Get-BridgeConfig {
     }
 }
 
+function Get-GitRoot {
+    param(
+        [string]$StartPath
+    )
+
+    $gitRoot = & git -C $StartPath rev-parse --show-toplevel 2>$null
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($gitRoot)) {
+        throw "Git repository not found from: $StartPath"
+    }
+
+    return $gitRoot.Trim()
+}
+
 $config = Get-BridgeConfig -Path $configPath
+$gitRoot = Get-GitRoot -StartPath $appRoot
 $pollSeconds = $config.poll_seconds
 $autoOpenVsCode = $config.auto_open_vscode
 $autoOpenPromptFile = $config.auto_open_prompt_file
 $copyToClipboard = $config.copy_to_clipboard
-$promptFolder = Join-Path $repoRoot $config.prompt_folder
+$promptFolder = Join-Path $appRoot $config.prompt_folder
 $doneFolder = Join-Path (Split-Path -Parent $promptFolder) "done"
+$codeCommand = Get-Command code -ErrorAction SilentlyContinue
+$openedRepoInCode = $false
+$processedPrompts = New-Object 'System.Collections.Generic.HashSet[string]'
+$lastGitError = $null
 
 if (-not (Test-Path -LiteralPath $promptFolder)) {
     New-Item -ItemType Directory -Path $promptFolder -Force | Out-Null
@@ -53,27 +71,17 @@ if (-not (Test-Path -LiteralPath $doneFolder)) {
     New-Item -ItemType Directory -Path $doneFolder -Force | Out-Null
 }
 
-$codeCommand = Get-Command code -ErrorAction SilentlyContinue
-$openedRepoInCode = $false
-$processedPrompts = New-Object 'System.Collections.Generic.HashSet[string]'
-$lastGitError = $null
-
 function Open-RepoInVsCode {
-    param(
-        [string]$RepoPath
-    )
-
     if (-not $script:autoOpenVsCode) {
         return
     }
 
     if (-not $script:codeCommand) {
-        Write-Warning "VS Code command 'code' was not found on PATH."
         return
     }
 
     if (-not $script:openedRepoInCode) {
-        & $script:codeCommand.Path $RepoPath | Out-Null
+        & $script:codeCommand.Path $script:appRoot | Out-Null
         $script:openedRepoInCode = $true
     }
 }
@@ -88,7 +96,6 @@ function Open-PromptFileInVsCode {
     }
 
     if (-not $script:codeCommand) {
-        Write-Warning "VS Code command 'code' was not found on PATH."
         return
     }
 
@@ -119,7 +126,7 @@ function Get-PromptKey {
 }
 
 function Invoke-GitPullQuietly {
-    $gitOutput = & git -C $script:repoRoot pull --quiet 2>&1
+    $gitOutput = & git -C $script:gitRoot pull --quiet 2>&1
     $gitExitCode = $LASTEXITCODE
 
     if ($gitExitCode -eq 0) {
@@ -182,11 +189,9 @@ function Print-And-HandlePrompt {
         }
     }
 
-    Open-RepoInVsCode -RepoPath $script:repoRoot
+    Open-RepoInVsCode
     Open-PromptFileInVsCode -FilePath $PromptFile.FullName
 }
-
-Open-RepoInVsCode -RepoPath $repoRoot
 
 while ($true) {
     try {
