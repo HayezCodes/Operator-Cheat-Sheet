@@ -23,6 +23,14 @@ LATHE_MATERIALS = {
         "rough": {"sfm": 180, "ipr": 0.008, "doc": ".080 - .120 / side", "insert": "DNMG", "chipbreaker": "SM", "notes": "Watch heat and maintain chipload."},
         "finish": {"sfm": 220, "ipr": 0.0035, "doc": ".005 - .010 total remaining", "insert": "VNMG", "chipbreaker": "SM", "notes": "Stable, light finish."},
     },
+    "Monel": {
+        "rough": {"sfm": 110, "ipr": 0.0085, "doc": ".080 - .100 / side", "insert": "DNMG", "chipbreaker": "SM / MF", "notes": "Conservative Monel roughing baseline. Keep pressure on the cut."},
+        "finish": {"sfm": 150, "ipr": 0.0035, "doc": ".006 - .012 total remaining", "insert": "VNMG", "chipbreaker": "SM / MF", "notes": "Light Monel finish pass. Avoid rubbing."},
+    },
+    "Zirconium": {
+        "rough": {"sfm": 90, "ipr": 0.0070, "doc": ".060 - .090 / side", "insert": "DNMG", "chipbreaker": "SM", "notes": "Very conservative zirconium roughing baseline. Keep heat controlled."},
+        "finish": {"sfm": 120, "ipr": 0.0030, "doc": ".005 - .010 total remaining", "insert": "VNMG", "chipbreaker": "SM", "notes": "Stable zirconium finish pass with light stock to clean."},
+    },
 }
 
 MILL_MATERIALS = {
@@ -61,6 +69,18 @@ MILL_MATERIALS = {
         "Drill": {"sfm": 30, "ipr": 0.0020, "notes": "Keep speed low."},
         "Tap": {"sfm": 40, "notes": "Controlled tapping baseline."},
         "Endmill": {"rough_sfm": 150, "rough_ipt": 0.0012, "rough_slot_doc_factor": 0.25, "rough_side_doc_factor": 0.50, "finish_sfm": 180, "finish_ipt": 0.0006, "finish_slot_doc_factor": 0.06, "finish_side_doc_factor": 0.15, "finish_radial": "0.003 - 0.008 radial", "notes": "Maintain chipload."},
+    },
+    "Monel": {
+        "Spot Drill": {"sfm": 28, "ipr": 0.0014, "notes": "Conservative Monel spotting baseline."},
+        "Drill": {"sfm": 22, "ipr": 0.0018, "notes": "Low-speed Monel drilling baseline. Keep pressure on the cut."},
+        "Tap": {"sfm": 20, "notes": "Very conservative Monel tapping baseline."},
+        "Endmill": {"rough_sfm": 90, "rough_ipt": 0.0009, "rough_slot_doc_factor": 0.22, "rough_side_doc_factor": 0.45, "finish_sfm": 115, "finish_ipt": 0.0005, "finish_slot_doc_factor": 0.05, "finish_side_doc_factor": 0.12, "finish_radial": "0.003 - 0.008 radial", "notes": "Monel likes a steady chip. Avoid light rubbing cuts."},
+    },
+    "Zirconium": {
+        "Spot Drill": {"sfm": 22, "ipr": 0.0012, "notes": "Very conservative zirconium spotting baseline."},
+        "Drill": {"sfm": 18, "ipr": 0.0016, "notes": "Slow zirconium drilling baseline. Keep heat down."},
+        "Tap": {"sfm": 18, "notes": "Conservative zirconium tapping baseline."},
+        "Endmill": {"rough_sfm": 75, "rough_ipt": 0.0008, "rough_slot_doc_factor": 0.20, "rough_side_doc_factor": 0.40, "finish_sfm": 95, "finish_ipt": 0.0004, "finish_slot_doc_factor": 0.05, "finish_side_doc_factor": 0.10, "finish_radial": "0.002 - 0.006 radial", "notes": "Zirconium baseline kept intentionally conservative for heat control."},
     },
 }
 
@@ -101,6 +121,18 @@ DRILL_DATA = {
         "Cobalt": {"sfm": 30, "ipr": 0.0025, "notes": "Cobalt titanium baseline."},
         "CoroDrill": {"sfm": 90, "ipr": 0.0038, "notes": "CoroDrill titanium baseline."},
     },
+    "Monel": {
+        "HSS": {"sfm": 16, "ipr": 0.0015, "notes": "Conservative Monel HSS drill baseline."},
+        "HSS Coated": {"sfm": 20, "ipr": 0.0017, "notes": "Coated HSS Monel drill baseline."},
+        "Cobalt": {"sfm": 24, "ipr": 0.0020, "notes": "Cobalt Monel drill baseline."},
+        "CoroDrill": {"sfm": 70, "ipr": 0.0032, "notes": "CoroDrill Monel baseline with conservative feed."},
+    },
+    "Zirconium": {
+        "HSS": {"sfm": 12, "ipr": 0.0013, "notes": "Very conservative zirconium HSS drill baseline."},
+        "HSS Coated": {"sfm": 16, "ipr": 0.0015, "notes": "Coated HSS zirconium drill baseline."},
+        "Cobalt": {"sfm": 20, "ipr": 0.0018, "notes": "Cobalt zirconium drill baseline."},
+        "CoroDrill": {"sfm": 55, "ipr": 0.0028, "notes": "CoroDrill zirconium baseline. Watch heat closely."},
+    },
 }
 
 TAP_SFM = {
@@ -110,6 +142,8 @@ TAP_SFM = {
     "Duplex / Alloy 20": 15,
     "Hastelloy": 10,
     "Titanium": 15,
+    "Monel": 12,
+    "Zirconium": 10,
 }
 
 OD_THREADING = {
@@ -119,6 +153,8 @@ OD_THREADING = {
     "Duplex / Alloy 20": {"sfm": 90, "ipr": 0.003},
     "Hastelloy": {"sfm": 80, "ipr": 0.003},
     "Titanium": {"sfm": 100, "ipr": 0.003},
+    "Monel": {"sfm": 75, "ipr": 0.0028},
+    "Zirconium": {"sfm": 65, "ipr": 0.0025},
 }
 
 OPERATOR_NOTES = {
@@ -173,6 +209,24 @@ OPERATOR_NOTES = {
         "AVOID RUBBING",
         "TAKE CONTROLLED PASSES",
         "WATCH INSERT EDGE CLOSELY",
+    ],
+    "Monel": [
+        "IF IT SMEARS -> INCREASE FEED OR REDUCE RPM",
+        "IF IT WORK HARDENS -> DO NOT DWELL",
+        "IF TOOL LIFE DROPS FAST -> SPEED TOO HIGH",
+        "",
+        "MONEL WORK HARDENS FAST",
+        "KEEP A STEADY CHIP",
+        "DO NOT RUB OR PECK LIGHTLY",
+    ],
+    "Zirconium": [
+        "IF HEAT BUILDS FAST -> REDUCE RPM",
+        "IF CUT FEELS DRY OR SMEARY -> INCREASE CHIPLOAD SLIGHTLY",
+        "IF TOOL DISCOLORS QUICKLY -> SPEED IS TOO HIGH",
+        "",
+        "KEEP HEAT DOWN",
+        "USE A STABLE CUT",
+        "AVOID DWELLING AND RUBBING",
     ],
     "General": [
         "START WITH THE APP NUMBER, THEN ADJUST TO ACTUAL CUT CONDITIONS.",

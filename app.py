@@ -89,15 +89,15 @@ with col2:
     st.markdown(
         """
         <div class="tool-card">
-            <div class="tool-icon">📝</div>
-            <div class="tool-title">Quick Notes</div>
-            <div class="tool-text">Fast note entry with machine dropdown, operator name, job info, and a saved log.</div>
+            <div class="tool-icon">📐</div>
+            <div class="tool-title">Formulas</div>
+            <div class="tool-text">Quick CNC formula reference for RPM, feedrate, DOC, tapping, drilling, and common shop terms.</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
-    if st.button("OPEN QUICK NOTES", use_container_width=True):
-        switch_to_page("Quick Notes")
+    if st.button("OPEN FORMULAS", use_container_width=True):
+        switch_to_page("Formulas")
 
 with col3:
     st.markdown(

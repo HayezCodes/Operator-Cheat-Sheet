@@ -5,7 +5,7 @@ APP_ROOT = Path(__file__).resolve().parent.parent
 PAGE_TARGETS = {
     "Home": APP_ROOT / "app.py",
     "Speeds & Feeds": APP_ROOT / "pages" / "1_Speeds_Feeds.py",
-    "Quick Notes": APP_ROOT / "pages" / "2_Quick_Notes.py",
+    "Formulas": APP_ROOT / "pages" / "2_Formulas.py",
     "G & M Codes": APP_ROOT / "pages" / "3_G_M_Codes.py",
 }
 

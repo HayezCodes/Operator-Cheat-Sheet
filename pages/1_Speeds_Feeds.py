@@ -89,15 +89,19 @@ def apply_cut_mode(value, kind="sfm"):
 
 def get_operator_notes(material_name: str):
     if "Titanium" in material_name:
-        return OPERATOR_NOTES["Titanium"]
+        return OPERATOR_NOTES.get("Titanium", OPERATOR_NOTES.get("General", []))
     elif "Duplex" in material_name or "Alloy 20" in material_name:
-        return OPERATOR_NOTES["Duplex"]
+        return OPERATOR_NOTES.get("Duplex", OPERATOR_NOTES.get("General", []))
     elif "Hastelloy" in material_name:
-        return OPERATOR_NOTES["Hastelloy"]
+        return OPERATOR_NOTES.get("Hastelloy", OPERATOR_NOTES.get("General", []))
+    elif "Monel" in material_name:
+        return OPERATOR_NOTES.get("Monel", OPERATOR_NOTES.get("General", []))
+    elif "Zirconium" in material_name:
+        return OPERATOR_NOTES.get("Zirconium", OPERATOR_NOTES.get("General", []))
     elif "Steel" in material_name or "17-4" in material_name or "300" in material_name:
-        return OPERATOR_NOTES["Steel"]
+        return OPERATOR_NOTES.get("Steel", OPERATOR_NOTES.get("General", []))
     else:
-        return OPERATOR_NOTES["General"]
+        return OPERATOR_NOTES.get("General", [])
 
 
 def render_operator_notes(material_name: str, title="Operator Notes"):
@@ -107,6 +111,52 @@ def render_operator_notes(material_name: str, title="Operator Notes"):
     for line in notes:
         if str(line).strip():
             st.write(line)
+
+
+def safe_display(value, fallback="Needs DOC"):
+    return value if value not in (None, "", "TBD") else fallback
+
+
+def format_doc_inches(value):
+    return f"{value:.4f} in"
+
+
+def get_endmill_doc_guidance(rec, operation, diameter):
+    def factor_to_doc(key):
+        factor = rec.get(key)
+        if factor in (None, "", "TBD"):
+            return "Needs DOC"
+
+        try:
+            return format_doc_inches(float(factor) * diameter)
+        except (TypeError, ValueError):
+            return "Needs DOC"
+
+    finish_radial = "—"
+
+    if operation == "rough":
+        slot_doc = factor_to_doc("rough_slot_doc_factor")
+        side_doc = factor_to_doc("rough_side_doc_factor")
+    else:
+        slot_doc = factor_to_doc("finish_slot_doc_factor")
+        side_doc = factor_to_doc("finish_side_doc_factor")
+        finish_radial = safe_display(rec.get("finish_radial"), "Needs DOC")
+
+    return {
+        "slot_doc": slot_doc,
+        "side_doc": side_doc,
+        "finish_radial": finish_radial,
+    }
+
+
+def render_endmill_doc_guidance(rec, operation, diameter):
+    doc_guidance = get_endmill_doc_guidance(rec, operation, diameter)
+
+    st.markdown("### DOC Guidance")
+    d1, d2, d3 = st.columns(3)
+    d1.metric("Slot DOC", doc_guidance["slot_doc"])
+    d2.metric("Side DOC", doc_guidance["side_doc"])
+    d3.metric("Finish Radial", doc_guidance["finish_radial"])
 
 
 def get_hif_feed_data(material_name: str):
@@ -168,6 +218,26 @@ def get_hif_feed_data(material_name: str):
             "chip_thickness": ".002 - .006",
             "coolant": "Yes",
             "grade_note": "Titanium hi-feed starting range",
+        }
+
+    if material_name == "Monel":
+        return {
+            "sfm_range": "60 - 140",
+            "ipt_range": ".0035 - .010",
+            "axial_doc": ".006 - .012",
+            "chip_thickness": ".0015 - .004",
+            "coolant": "Yes",
+            "grade_note": "Conservative Monel hi-feed starting range",
+        }
+
+    if material_name == "Zirconium":
+        return {
+            "sfm_range": "50 - 120",
+            "ipt_range": ".0030 - .009",
+            "axial_doc": ".006 - .012",
+            "chip_thickness": ".0015 - .0035",
+            "coolant": "Yes",
+            "grade_note": "Conservative zirconium hi-feed starting range",
         }
 
     return {
@@ -300,25 +370,26 @@ with main_tab1:
             )
 
         rec = LATHE_MATERIALS[material][operation]
+        doc_value = safe_display(rec.get("doc", "Needs DOC"))
         sfm = apply_cut_mode(rec["sfm"], "sfm")
         ipr = apply_cut_mode(rec["ipr"], "ipr")
         rpm = rpm_from_sfm(sfm, diameter)
         ipm = ipm_from_ipr(ipr, rpm)
 
         st.markdown("### Recommendation")
-        c1, c2, c3, c4 = st.columns(4)
+        c1, c2, c3, c4, c5 = st.columns(5)
         c1.metric("SFM", f"{sfm:.0f}")
         c2.metric("RPM", f"{rpm:.0f}")
         c3.metric("Feed (IPR)", f"{ipr:.4f}")
         c4.metric("Feed (IPM)", f"{ipm:.2f}")
+        c5.metric("DOC", doc_value)
+        st.caption("Lathe DOC is radial / per-side unless the material note says total remaining.")
 
         st.markdown("### Setup Guidance")
-        g1, g2 = st.columns(2)
-        g1.metric("DOC Guidance", rec["doc"])
-        g2.markdown(
+        st.markdown(
             f"""
 <div style="font-size:0.90rem; line-height:1.40;">
-<b>Chipbreaker:</b><br>{rec["chipbreaker"]}
+<b>Chipbreaker:</b><br>{safe_display(rec.get("chipbreaker"), "—")}
 </div>
 """,
             unsafe_allow_html=True,
@@ -412,7 +483,7 @@ with main_tab1:
             c1, c2, c3 = st.columns(3)
             c1.metric("SFM Range", hif["sfm_range"])
             c2.metric("IPT Range", hif["ipt_range"])
-            c3.metric("Axial DOC", hif["axial_doc"])
+            c3.metric("Axial DOC", safe_display(hif.get("axial_doc"), "Needs DOC"))
 
             d1, d2, d3 = st.columns(3)
             d1.metric("Chip Thickness", hif["chip_thickness"])
@@ -429,15 +500,9 @@ with main_tab1:
             if em_operation_live == "rough":
                 sfm_live = apply_cut_mode(rec_live["rough_sfm"], "sfm")
                 ipt_live = apply_cut_mode(rec_live["rough_ipt"], "ipt")
-                slot_doc_live = rec_live["rough_slot_doc_factor"] * tool_diameter_live
-                side_doc_live = rec_live["rough_side_doc_factor"] * tool_diameter_live
-                finish_note_live = rec_live["finish_radial"]
             else:
                 sfm_live = apply_cut_mode(rec_live["finish_sfm"], "sfm")
                 ipt_live = apply_cut_mode(rec_live["finish_ipt"], "ipt")
-                slot_doc_live = rec_live["finish_slot_doc_factor"] * tool_diameter_live
-                side_doc_live = rec_live["finish_side_doc_factor"] * tool_diameter_live
-                finish_note_live = rec_live["finish_radial"]
 
             rpm_live = rpm_from_sfm(sfm_live, tool_diameter_live)
             ipm_live = rpm_live * flute_count_live * ipt_live
@@ -449,11 +514,7 @@ with main_tab1:
             c3.metric("Chipload (IPT)", f"{ipt_live:.4f}")
             c4.metric("Feed (IPM)", f"{ipm_live:.2f}")
 
-            st.markdown("### DOC Guidance")
-            d1, d2, d3 = st.columns(3)
-            d1.metric("Slot DOC", f"{slot_doc_live:.4f}")
-            d2.metric("Side DOC", f"{side_doc_live:.4f}")
-            d3.metric("Finish Radial", finish_note_live)
+            render_endmill_doc_guidance(rec_live, em_operation_live, tool_diameter_live)
 
             st.write(f"**Notes:** {rec_live['notes']}")
             render_operator_notes(material_live)
@@ -670,7 +731,7 @@ with main_tab2:
             c1, c2, c3 = st.columns(3)
             c1.metric("SFM Range", hif["sfm_range"])
             c2.metric("IPT Range", hif["ipt_range"])
-            c3.metric("Axial DOC", hif["axial_doc"])
+            c3.metric("Axial DOC", safe_display(hif.get("axial_doc"), "Needs DOC"))
 
             d1, d2, d3 = st.columns(3)
             d1.metric("Chip Thickness", hif["chip_thickness"])
@@ -688,15 +749,9 @@ with main_tab2:
             if em_operation == "rough":
                 sfm = apply_cut_mode(rec["rough_sfm"], "sfm")
                 ipt = apply_cut_mode(rec["rough_ipt"], "ipt")
-                slot_doc = rec["rough_slot_doc_factor"] * diameter
-                side_doc = rec["rough_side_doc_factor"] * diameter
-                finish_note = rec["finish_radial"]
             else:
                 sfm = apply_cut_mode(rec["finish_sfm"], "sfm")
                 ipt = apply_cut_mode(rec["finish_ipt"], "ipt")
-                slot_doc = rec["finish_slot_doc_factor"] * diameter
-                side_doc = rec["finish_side_doc_factor"] * diameter
-                finish_note = rec["finish_radial"]
 
             rpm = rpm_from_sfm(sfm, diameter)
             ipm = rpm * flute_count * ipt
@@ -708,11 +763,7 @@ with main_tab2:
             c3.metric("Chipload (IPT)", f"{ipt:.4f}")
             c4.metric("Feed (IPM)", f"{ipm:.2f}")
 
-            st.markdown("### DOC Guidance")
-            d1, d2, d3 = st.columns(3)
-            d1.metric("Slot DOC", f"{slot_doc:.4f}")
-            d2.metric("Side DOC", f"{side_doc:.4f}")
-            d3.metric("Finish Radial", finish_note)
+            render_endmill_doc_guidance(rec, em_operation, diameter)
 
             st.write(f"**Notes:** {rec['notes']}")
             render_operator_notes(material_mill)
